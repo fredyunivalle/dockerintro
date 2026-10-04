@@ -3,7 +3,7 @@
 ## 🎯 Objective
 In this lab, every student will design and **build their own Docker image**, publish it to **Docker Hub or GitHub Packages**, and then run a container from that image.  
 Each container will live in a **neighborhood (Docker network)** and will log its activity into the shared **La Biblioteca del Pueblo** volume.  
-Additionally, students must collaborate using **Git trunk-based development** with a shared repository, where each student contributes their own component inside a dedicated folder.
+Additionally, students must collaborate using **Git trunk-based development** in their shared **team fork**, where each student contributes their own component inside a dedicated folder.
 
 The goal is to learn **networks**, **volumes**, **image publishing**, and **team collaboration with Git**, while being creative with your container design.
 
@@ -29,10 +29,78 @@ docker volume create biblioteca-del-pueblo
 
 ---
 
+## 🤝 Mandatory GitHub collaboration workflow
+
+### 1) Fork the repository (required)
+- Each team must **fork** the original repository before starting the lab.
+- All team members must clone and work from the **team fork**.
+- Do **not** make changes directly in the original repository.
+- Configure remotes so the fork can be synchronized with the original repository when needed:
+
+```bash
+# after cloning your team fork
+git remote add upstream https://github.com/fredyunivalle/dockerintro.git
+git fetch upstream
+```
+
+### 2) Configure GitHub Copilot (required)
+- GitHub Copilot must be enabled and available for each student account.
+- Copilot is a **mandatory part** of this lab workflow.
+- Verify access in GitHub Copilot settings if needed: https://github.com/settings/copilot
+
+### 3) Each student must create their own GitHub Issue before coding
+Before implementing your service, create an individual Issue that Copilot can follow.
+
+Your Issue must include at least:
+- Student name
+- Chosen neighborhood
+- Chosen technology stack
+- Service behavior
+- Required port
+- Required environment variables
+- Logging requirement
+- Health endpoint
+- Docker image requirement
+- Expected acceptance criteria
+
+### 4) Copilot must assist implementation
+- Assign/delegate the Issue to GitHub Copilot / Copilot coding agent when available.
+- Copilot must generate or modify part of the implementation.
+- Review Copilot-generated changes before merging.
+- Validate that the result satisfies the Issue requirements.
+- Do not blindly accept generated code.
+
+### 5) Mandatory Issue challenge for every student service
+Each student Issue must ask Copilot to help create a service that:
+- Listens on port `8080`
+- Responds with `Hola, I am <YourName> and I live in <Neighborhood>`
+- Uses environment variables for student name and neighborhood
+- Writes every request to `/var/log/app/visitas.log`
+- Provides a `/health` endpoint
+- Is packaged as a Docker image
+- Can run in the assigned Docker network
+- Uses the shared `biblioteca-del-pueblo` volume
+
+### 6) Required Git workflow sequence
+1. Fork repository.
+2. Clone the team's fork.
+3. Create a GitHub Issue.
+4. Assign or delegate the Issue to Copilot.
+5. Create a short-lived branch if needed.
+6. Let Copilot propose or implement changes.
+7. Review the changes.
+8. Test the service locally.
+9. Create or review the Pull Request.
+10. Merge into `main`.
+11. Build and publish the Docker image.
+12. Run and validate the container.
+
+---
+
 ## 👩‍💻 Student Task
 
 ### Step 1: Repository structure with Git trunk strategy
-- The team will work on **one shared Git repository** using **trunk-based development**.  
+- The team will work on **one shared team fork** using **trunk-based development**.  
 - Students will create **short-lived branches from `main`** and merge back quickly with small, tested contributions (via Pull Requests).  
 - Each student must create a folder under `/students/<your-name>/` with their component definition (Dockerfile, code, dependencies). Example:
 
@@ -237,13 +305,19 @@ docker run --rm -it -v biblioteca-del-pueblo:/data alpine sh
 - How **Docker networks** isolate and connect services.  
 - How **volumes** allow sharing and persistence of data.  
 - How collaboration looks when multiple services write to the same shared space.  
+- How to delegate a well-scoped implementation task to **GitHub Copilot via GitHub Issues**.
 
 ---
 
 # 📌 Deliverables
-- A folder in the shared repo `/students/<your-name>/` with Dockerfile, code, and dependencies.  
+- A folder in the team fork `/students/<your-name>/` with Dockerfile, code, and dependencies.  
+- Your own GitHub Issue with complete service requirements.
+- Evidence of Copilot participation in your task.
+- Your Pull Request linked to the Issue.
 - A published Docker image (Docker Hub or GitHub Packages).  
 - A working container in your chosen neighborhood.  
+- Evidence of successful image build and published image.
+- Evidence of network connectivity test.
 - Evidence that your service wrote to **La Biblioteca del Pueblo**.  
 - Short explanation of your design choice (Python, Node.js, Nginx, etc).  
 - Optional: use your **own names** for networks, images, and containers to make the demo personal.  
