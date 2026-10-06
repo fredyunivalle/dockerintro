@@ -1,39 +1,39 @@
 import os
-import pathlib
-import datetime
-from fastapi import FastAPI, Request, Response
+from datetime import datetime, timezone
+from pathlib import Path
 
-app = FastAPI()
+from flask import Flask, Response, request
 
-# Environment variables
-STUDENT = os.getenv("STUDENT_NAME", "Anon")
-BARRIO = os.getenv("BARRIO", "barrio-desconocido")
-LOG_PATH = "/var/log/app/visitas.log"
+app = Flask(__name__)
 
-# Ensure log directory exists
-pathlib.Path("/var/log/app").mkdir(parents=True, exist_ok=True)
+LOG_PATH = os.getenv("LOG_PATH", "/var/log/app/visitas.log")
+try:
+    Path(LOG_PATH).parent.mkdir(parents=True, exist_ok=True)
+except PermissionError:
+    pass
 
-def log_visit(request: Request, msg: str):
-    """Logs the timestamp, client IP, and message to a file."""
-    # Use timezone-aware UTC
-    ts = datetime.datetime.now(datetime.UTC).isoformat()
-    client_ip = request.client.host if request.client else "unknown"
-    line = f"{ts} ip={client_ip} path={request.url.path} msg={msg}\n"
-    with open(LOG_PATH, "a", encoding="utf-8") as f:
-        f.write(line)
+
+@app.before_request
+def log_request() -> None:
+    ts = datetime.now(timezone.utc).isoformat()
+    client_ip = request.remote_addr or "unknown"
+    line = f"{ts} ip={client_ip} method={request.method} path={request.path}\n"
+    with open(LOG_PATH, "a", encoding="utf-8") as log_file:
+        log_file.write(line)
+
 
 @app.get("/")
-async def root(request: Request):
-    """Main entry point returning plain text."""
-    msg = f"Hola, soy {STUDENT} y vivo en {BARRIO}"
-    log_visit(request, msg)
-    return Response(content=msg, media_type="text/plain; charset=utf-8")
+def root() -> Response:
+    student_name = os.getenv("STUDENT_NAME", "Anon")
+    neighborhood = os.getenv("NEIGHBORHOOD", "Unknown")
+    msg = f"Hola, I am {student_name} and I live in {neighborhood}"
+    return Response(msg, mimetype="text/plain")
+
 
 @app.get("/health")
-async def health():
-    """Health check endpoint for monitoring."""
-    return {"ok": True}
+def health():
+    return {"status": "UP"}, 200
+
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    app.run(host="0.0.0.0", port=8080)
