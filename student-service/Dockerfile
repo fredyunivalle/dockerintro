@@ -1,14 +1,11 @@
 # syntax=docker/dockerfile:1.7
-FROM python:3.12-alpine
+FROM python:3.11-slim
 
 # Create non-root user for security
-RUN addgroup -S app && adduser -S app -G app
+RUN groupadd --system app && useradd --system --gid app app
 
 # Set working directory
 WORKDIR /app
-
-# Install wget for healthcheck
-RUN apk add --no-cache wget
 
 # Install dependencies
 COPY requirements.txt .
@@ -28,7 +25,7 @@ EXPOSE 8080
 
 # Healthcheck definition
 HEALTHCHECK --interval=10s --timeout=3s --retries=5 \
-  CMD wget -qO- http://localhost:8080/health >/dev/null || exit 1
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=2)"
 
-# Start the application using Uvicorn
-CMD ["python", "app.py"]
+# Start the application using Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
