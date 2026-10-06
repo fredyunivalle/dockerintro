@@ -25,7 +25,7 @@ def log_request() -> None:
 @app.get("/")
 def root() -> Response:
     student_name = os.getenv("STUDENT_NAME", "Anon")
-    neighborhood = os.getenv("NEIGHBORHOOD", "Unknown")
+    neighborhood = os.getenv("NEIGHBORHOOD") or os.getenv("BARRIO", "Unknown")
     msg = f"Hola, I am {student_name} and I live in {neighborhood}"
     return Response(msg, mimetype="text/plain")
 
